@@ -19,6 +19,22 @@
 * cables).
 * 
 * 
+* HOW TO USE
+* 
+* Capture your remote controls with RemoteCapture.ino and copy paste the 65 bit
+* commands to A-OK.ino for sendAOKCommand(). More info about this
+* provided in RemoteCapture.ino.
+* 
+* 
+* HOW TO USE WITH EXAMPLE COMMANDS
+* 
+* 1. Set the shade into pairing mode by holding down its SETTING button until it enters programming mode.
+* 2. Send the pairing command, eg. "sendAOKCommand(AOK_SETTING_1);".
+* 3. Now you can control the shade, eg. sendAOKCommand(AOK_DOWN_1); (or AOK_UP_1, AOK_STOP_1 etc.).
+* 
+* Setting limits is quicker with the remotes, although you can use your Arduino for that as well.
+*
+*
 * PROTOCOL DESCRIPTION
 * 
 * Two remote controls and motors are not enough data to understand the protocol,
