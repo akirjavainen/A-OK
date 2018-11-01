@@ -10,7 +10,7 @@
 * This is an incomplete protocol implementation for the A-OK window shades.
 * I don't personally have any of these motors in use, just happened to
 * stumble upon some AM25-1.2/30-MEL-P units and quickly edited my Markisol
-* protocol code to control it.
+* protocol code to control them.
 * 
 * The motors themselves are of sturdy build and amazingly quiet in operation.
 * If there is anything obviously negative to state about them, it's the short
