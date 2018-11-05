@@ -65,12 +65,6 @@
 * Data 0 = MEDIUM LOW - MEDIUM HIGH - SHORT LOW (wire 00110)
 * Data 1 = LONG HIGH - SHORT LOW (wire 1110)
 * 
-* What I've figured of the command bits so far:
-* 24 bits for (unique) remote control ID, hard coded in remotes
-* 4 bits for command: DOWN = ????, UP = ????, STOP = ????, SETTING = ????
-* Other 37 bits unknown as of now
-* = 65 bits in total
-* 
 * End with LOW radio silence of (minimum) 11 samples = 249 us
 *
 ******************************************************************************************************************************************************************
@@ -132,6 +126,7 @@ void loop() {
   // down its setting key), then send the pairing command:
   //sendAOKCommand(AOK_PAIR_2);
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
+  // ---
 
   // Send the command:
   sendAOKCommand(AOK_UP_1);
@@ -170,7 +165,7 @@ void sendAOKCommand(String command) {
 
   // Disable output to transmitter to prevent interference with
   // other devices. Otherwise the transmitter will keep on transmitting,
-  // which will disrupt most appliances operating on the 433.92MHz band:
+  // disrupting most appliances operating on the 433.92MHz band:
   digitalWrite(TRANSMIT_PIN, LOW);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,7 +192,7 @@ void doAOKTribitSend(int *command_array) {
         transmitWaveformLow(AOK_PULSE_SHORT);
       }
 
-      // If current bit is 1, transmit HIGH-HIGH-HIGH-LOW:
+      // If current bit is 1, transmit HIGH-HIGH-HIGH-LOW (1110):
       if (command_array[i] == 1) {
         transmitWaveformHigh(AOK_PULSE_LONG);
         transmitWaveformLow(AOK_PULSE_SHORT);
@@ -205,7 +200,7 @@ void doAOKTribitSend(int *command_array) {
    }
 
   // Radio silence at the end.
-  // It's better to rather go a bit over than under required length.
+  // It's better to go a bit over than under minimum required length:
   transmitWaveformLow(AOK_RADIO_SILENCE);
   
   if (DEBUG) {
