@@ -6,8 +6,9 @@
 * 
 * Code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 * 
-* Use this code to capture the commands from your remotes. Outputs to serial.
-* What you need for mastering your shades are 65 bits commands.
+* Use this code to capture the commands from your remotes. Outputs to
+* serial (Tools -> Serial Monitor). What you need for mastering your
+* shades are 65 bits commands.
 * 
 * 
 * HOW TO USE
@@ -21,15 +22,15 @@
 
 
 // Plug your 433.92MHz receiver to digital pin 2:
-#define RECEIVE_PIN   2
+#define RECEIVE_PIN       2
 
 // Enable debug mode if there's no serial output or if you're modifying this code for
 // another protocol/device. However, note that serial output delays receiving, causing
 // data bits capture to fail. So keep debug disabled unless absolutely required:
-#define DEBUG         false
-#define ADDITIONAL    false    // Display some additional info after capture
+#define DEBUG             false
+#define ADDITIONAL        false    // Display some additional info after capture
 
-#define COMMAND_LENGTH  65
+#define COMMAND_LENGTH    65
 
 
 
