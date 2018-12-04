@@ -253,7 +253,7 @@ void convertStringToArrayOfInt(String command, int *int_array, int command_array
   for (int i = 0; i < command_array_size; i++) {
       c = command.substring(i, i + 1);
 
-      if (c == "0" || c == "1" || c == "2" || c == "3") { // 2 and 3 are allowed for other projects of mine (not used by this code)
+      if (c == "0" || c == "1") {
         int_array[i] = convertStringToInt(c);
       } else {
         errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command.");
