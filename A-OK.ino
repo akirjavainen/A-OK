@@ -1,22 +1,12 @@
 /*
 ******************************************************************************************************************************************************************
 *
-* A-OK 433.92MHz motorized window shades
+* A-OK AC114-01B remote control (RF 433.92MHz) for window shades and projector screens
 * Control code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
-* AC114-01B is the only remote control tested.
 * 
 * https://www.a-okmotors.com/en/
 * 
-* This is an incomplete protocol implementation for the A-OK window shades.
-* I don't personally have any of these motors in use, just happened to
-* stumble upon some AM25-1.2/30-MEL-P units and quickly edited my Markisol
-* protocol code to control them.
-* 
-* The motors themselves are of sturdy build and amazingly quiet in operation.
-* If there is anything obviously negative to state about them, it's the short
-* power cable. Since they run on AC power, an extension cord hanging from
-* the top of your window looks kind of ugly (compared to thin DC 5/12/24V
-* cables).
+* This is an incomplete implementation of the A-OK protocol. I only have one remote control.
 * 
 * 
 * HOW TO USE
@@ -28,33 +18,46 @@
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
 * 
-* 1. Set the shade into pairing mode by holding down its SETTING button until it enters programming mode.
-* 2. Send the pairing command, eg. "sendAOKCommand(AOK_SETTING_1);".
-* 3. Now you can control the shade, eg. sendAOKCommand(AOK_DOWN_1); (or AOK_UP_1, AOK_STOP_1 etc.).
+* 1. Set the shade into pairing mode by holding down its PROGRAM button until it enters programming mode.
+* 2. Send the pairing command, eg. "sendAOKCommand(AOK_PROGRAM_EXAMPLE);".
+* 3. Now you can control the shade, eg. sendAOKCommand(AOK_DOWN_EXAMPLE); (or AOK_UP_EXAMPLE, AOK_STOP_EXAMPLE etc.).
 * 
 * Setting limits is quicker with the remotes, although you can use your Arduino for that as well.
 *
 *
 * PROTOCOL DESCRIPTION
 * 
-* Two remote controls and motors are not enough data to understand the protocol,
-* but here's what I've figured out so far. Unless I'm completely mistaken, the
-* whole sequence seems encoded/ciphered with something, possibly XOR.
+* One remote control is not enough data to understand the protocol, but here's what I've
+* figured out so far.
 * 
 * UP and DOWN buttons send two different commands for some reason, listed below
-* as AOK_UP/DOWN_1/2 and AOK_AFTER_UP_DOWN_1/2. However, the latter command
-* (AOK_AFTER_UP_DOWN_1/2) would not seem to be necessary.
+* as AOK_UP/DOWN_EXAMPLE and AOK_AFTER_UP_DOWN_EXAMPLE. However, the latter command
+* would not seem to be required at all.
 * 
 * Tri-state bits are used.
-* A single command is: 2 AGC bits + 65 command tribits + short radio silence
-* Swapping HIGH and LOW does not work with these shades.
 * 
+* AGC:
+* Some remotes start the first command with 8 times: HIGH of approx. 340 us + LOW of approx. 520 us
+* But most remotes do not transmit that preample.
+* Every remote starts the command with an AGC HIGH of approx. 5200 us.
+* Then go low for approx. 530 us and start the commands bits.
+* 
+* COMMAND BITS:
+* 49 bits for a unique remote ID
+* 7 bits for command (UP = 0001011, DOWN = 1000011, STOP = 0100011, PROGRAM = 1010011, AFTER UP/DOWN = 0100100)
+* 5 bits are unknown (maybe some kind of checksum?)
+* 4 bits at the end are always 0111, except for the AFTER UP/DOWN commands 1001
+* 
+* = a total of 65 command bits
+* 
+* RADIO SILENCE:
+* Some remotes instantly repeat the commands, some transmit a radio silence of approx. 5030 us at the end
+* of each command.
+* 
+* 
+* TIMINGS:
 * All sample counts below listed with a sample rate of 44100 Hz
 * (sample count / 44100 = microseconds).
-*
-* Starting (AGC) bits:
-* HIGH of approx. 234 samples = 5306 us
-* LOW of approx. 225 samples = 5102 us
 * 
 * Pulse length:
 * SHORT (LOW): approx. 7 samples = 159 us
@@ -72,19 +75,12 @@
 
 
 
-// Remote 1:
-#define AOK_DOWN_1              "10101110010100000001110000000011011111110111111111011110010011100"
-#define AOK_UP_1                "10101110010100000001110000000011011111110111111111111010011010100"
-#define AOK_AFTER_UP_DOWN_1     "10101110010100000001110000000011011111110111111111101101110111011"
-#define AOK_STOP_1              "10101110010100000001110000000011011111110111111111101110010111100"
-#define AOK_SETTING_1           "10101110010100000001110000000011011111110111111111010110010001100"
-
-// Remote 2:
-#define AOK_DOWN_2              "10101110010100000000110011100110111111110111111111011110001000100"
-#define AOK_UP_2                "10101110010100000000110011100110111111110111111111010101000110010"
-#define AOK_AFTER_UP_DOWN_2     "10101110010100000000110011100110111111110111111111101101101100011"
-#define AOK_STOP_2              "10101110010100000000110011100110111111110111111111101110001100100"
-#define AOK_SETTING_2           "10101110010100000000110011100110111111110111111111010110000110100"
+// Example commands:
+#define AOK_DOWN_EXAMPLE              "10100011010001100101000000010110000000010000000001000011111100001"
+#define AOK_UP_EXAMPLE                "10100011010001100101000000010110000000010000000000001011101110001"
+#define AOK_AFTER_UP_DOWN_EXAMPLE     "10100011010001100101000000010110000000010000000000100100110100011"
+#define AOK_STOP_EXAMPLE              "10100011010001100101000000010110000000010000000000100011110100001"
+#define AOK_PROGRAM_EXAMPLE           "10100011010001100101000000010110000000010000000001010011000000001"
 
 
 #define TRANSMIT_PIN             13      // We'll use digital 13 for transmitting
@@ -99,12 +95,11 @@
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
 // Sample counts listed below with a sample rate of 44100 Hz:
 #define AOK_AGC1_PULSE                   5300  // 234 samples
-#define AOK_AGC2_PULSE                   5090  // 225 samples
-#define AOK_RADIO_SILENCE                300   // 11 samples
+#define AOK_AGC2_PULSE                   530   // 24 samples after the actual AGC bit
+#define AOK_RADIO_SILENCE                5030  // 222 samples
 
-#define AOK_PULSE_SHORT                  155   // 7 samples, used for LOW
-#define AOK_PULSE_MEDIUM                 380   // 17 samples, used for HIGH-HIGH
-#define AOK_PULSE_LONG                   650   // 31 samples, used for HIGH-HIGH-HIGH
+#define AOK_PULSE_SHORT                  270   // 12 samples
+#define AOK_PULSE_LONG                   565   // 25 samples, approx. 2 * AOK_PULSE_SHORT
 
 #define AOK_COMMAND_BIT_ARRAY_SIZE       65    // Command bit count
 
@@ -124,14 +119,14 @@ void loop() {
 
   // Pair a shade (first set the shade to pairing mode by holding
   // down its setting key), then send the pairing command:
-  //sendAOKCommand(AOK_PAIR_2);
+  //sendAOKCommand(AOK_PROGRAM_EXAMPLE);
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
   // ---
 
   // Send the command:
-  sendAOKCommand(AOK_UP_1);
+  sendAOKCommand(AOK_UP_EXAMPLE);
   delay(5000);
-  sendAOKCommand(AOK_STOP_1);
+  sendAOKCommand(AOK_STOP_EXAMPLE);
   delay(5000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -179,29 +174,28 @@ void doAOKTribitSend(int *command_array) {
   }
 
   // Starting (AGC) bits:
-  transmitWaveformHigh(AOK_AGC1_PULSE);
-  transmitWaveformLow(AOK_AGC2_PULSE);
+  transmitHigh(AOK_AGC1_PULSE);
+  transmitLow(AOK_AGC2_PULSE);
 
   // Transmit command:
   for (int i = 0; i < AOK_COMMAND_BIT_ARRAY_SIZE; i++) {
 
-      // If current bit is 0, transmit LOW-LOW-HIGH-HIGH-LOW (00110):
+      // If current bit is 0, transmit HIGH-LOW-LOW (100):
       if (command_array[i] == 0) {
-        transmitWaveformLow(AOK_PULSE_MEDIUM);
-        transmitWaveformHigh(AOK_PULSE_MEDIUM);
-        transmitWaveformLow(AOK_PULSE_SHORT);
+        transmitHigh(AOK_PULSE_SHORT);
+        transmitLow(AOK_PULSE_LONG);
       }
 
-      // If current bit is 1, transmit HIGH-HIGH-HIGH-LOW (1110):
+      // If current bit is 1, transmit HIGH-HIGH-LOW (110);
       if (command_array[i] == 1) {
-        transmitWaveformHigh(AOK_PULSE_LONG);
-        transmitWaveformLow(AOK_PULSE_SHORT);
+        transmitHigh(AOK_PULSE_LONG);
+        transmitLow(AOK_PULSE_SHORT);
       }   
    }
 
   // Radio silence at the end.
   // It's better to go a bit over than under minimum required length:
-  transmitWaveformLow(AOK_RADIO_SILENCE);
+  transmitLow(AOK_RADIO_SILENCE);
   
   if (DEBUG) {
     Serial.println();
@@ -214,17 +208,15 @@ void doAOKTribitSend(int *command_array) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void transmitWaveformHigh(int delay_microseconds) {
-  digitalWrite(TRANSMIT_PIN, LOW); // Digital pin low transmits a high waveform
-  //PORTB = PORTB D13low; // If you wish to use faster PORTB commands instead
+void transmitHigh(int delay_microseconds) {
+  digitalWrite(TRANSMIT_PIN, HIGH);
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void transmitWaveformLow(int delay_microseconds) {
-  digitalWrite(TRANSMIT_PIN, HIGH); // Digital pin high transmits a low waveform
-  //PORTB = PORTB D13high; // If you wish to use faster PORTB commands instead
+void transmitLow(int delay_microseconds) {
+  digitalWrite(TRANSMIT_PIN, LOW);
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
