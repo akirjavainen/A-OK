@@ -8,7 +8,7 @@
 * 
 * Use this code to capture the commands from your remotes. Outputs to
 * serial (Tools -> Serial Monitor). What you need for mastering your
-* shades are 65 bits commands.
+* motors are 65 bits commands.
 * 
 * 
 * HOW TO USE
@@ -126,7 +126,7 @@ void loop()
   } else {
     if (command != last_command) {
       last_command = command;
-      //Serial.print("Successful capture, command is: ");
+      Serial.print("Successful capture, command is: ");
       Serial.println(command);
     } else {
       Serial.println("Command repeated");
