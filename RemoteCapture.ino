@@ -33,6 +33,8 @@
 #define COMMAND_LENGTH    65
 
 
+String last_command = "";
+
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void setup()
@@ -47,44 +49,28 @@ void loop()
 {
   int i = 0;
   unsigned long t = 0;
-
-
-  // As a quick hack, we add the leading 1 here.
-  // The way I wrote the code misses the first data bit.
-  // However, every A-OK protocol command starts with
-  // it, so function-wise it's not a big deal:
-  String command = "1";
+  String command = "";
 
 
   // *********************************************************************
-  // Wait for the first AGC bit:
+  // Wait for the AGC bit
   // *********************************************************************
-  // HIGH between 5230-5310 us
+  // NOTE: Some AC114-01B remotes precede this with a preample
+  // (repeated 8 times):
+  // *********************************************************************  
+  // HIGH of approx. 340 us
+  // LOW of approx. 520 us
+  // *********************************************************************
+  // But we'll ignore this preample since not all remotes transmit it.
+  // All remotes start the command with an AGC of HIGH between 4800-5500 us
   // *********************************************************************
   
-  while (t < 5230 || t > 5310) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
+  while (t < 4800 || t > 5500) {
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for HIGH and times it
   }
 
   if (DEBUG) {
-    Serial.print("AGC 1: ");
-    Serial.println(t);
-    //return; // If modifying this code for another protocol, stop here
-  }
-
-
-  // *********************************************************************
-  // Wait for second AGC bit:
-  // *********************************************************************
-  // LOW between 5040-5150 us
-  // *********************************************************************
-  
-  while (t < 5040 || t > 5150) {
-    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for a LOW waveform spike (high-LOW-high)
-  }
-
-  if (DEBUG) {
-    Serial.print("AGC 2: ");
+    Serial.print("AGC: ");
     Serial.println(t);
     //return; // If modifying this code for another protocol, stop here
   }
@@ -93,28 +79,30 @@ void loop()
   // *********************************************************************
   // Command bits, locate them simply by HIGH waveform spikes:
   // *********************************************************************  
-  // 0 = 320-370 us
-  // 1 = 600-700 us
+  // 0 = 25-370 us
+  // 1 = 500-800 us
   // *********************************************************************
 
   while (i < COMMAND_LENGTH) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for HIGH and times it
     
     if (DEBUG) {
       Serial.print(t);
       Serial.print(": ");
     }
 
-    if (t > 320 && t < 370) { // Found 0
+    if (t > 25 && t < 370) { // Found 0
       command += "0";
       if (DEBUG) Serial.println("0");
 
-    } else if (t > 600 && t < 700) { // Found 1
+    } else if (t > 500 && t < 800) { // Found 1
       command += "1";
       if (DEBUG) Serial.println("1");
       
-    } else { // Unrecognized bit, finish
+    } else { // Unrecognized bit (could be the next command's starting AGC), finish
       if (DEBUG) Serial.println("INVALID BIT");
+      //Serial.print("INVALID BIT: ");
+      //Serial.println(t);
       i = 0;
       break;
     }
@@ -130,12 +118,19 @@ void loop()
   if (command.length() != COMMAND_LENGTH) {
     Serial.print("Bad capture, invalid command length ");
     Serial.println(command.length());
-    if (ADDITIONAL) Serial.println("Invalid command: " + command);
-    Serial.println();
+    
+    if (ADDITIONAL) {
+      Serial.println("Invalid command: " + command);
+    }
     
   } else {
-    Serial.println("Successful capture, command is: " + command);
-    Serial.println();
+    if (command != last_command) {
+      last_command = command;
+      //Serial.print("Successful capture, command is: ");
+      Serial.println(command);
+    } else {
+      Serial.println("Command repeated");
+    }
   }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
