@@ -1,9 +1,7 @@
 # A-OK AC114-01B remote control (RF 433.92MHz) for window shades and motorized projector screens
-Tested with AM25-1.2/30-MEL-P motors and AC202-02 radio receivers.
+A-OK protocol implementation for Arduino. Tested with AM25-1.2/30-MEL-P motors and AC202-02 radio receivers.
 
 https://www.a-okmotors.com/en/
-
-This is an incomplete implementation of the A-OK protocol for the Arduino.
 
 
 # How to use
