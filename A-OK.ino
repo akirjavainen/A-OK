@@ -38,7 +38,7 @@
 * 
 * AGC:
 * Some remotes start the first command with 8 times: HIGH of approx. 340 us + LOW of approx. 520 us
-* But most remotes do not transmit that preample.
+* But most remotes do not transmit that preamble.
 * Every remote starts the command with an AGC HIGH of approx. 5200 us.
 * Then go low for approx. 530 us and start the commands bits.
 * 
