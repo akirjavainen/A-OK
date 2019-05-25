@@ -55,13 +55,13 @@ void loop()
   // *********************************************************************
   // Wait for the AGC bit
   // *********************************************************************
-  // NOTE: Some AC114-01B remotes precede this with a preample
+  // NOTE: Some AC114-01B remotes precede this with a preamble
   // (repeated 8 times):
   // *********************************************************************  
   // HIGH of approx. 340 us
   // LOW of approx. 520 us
   // *********************************************************************
-  // But we'll ignore this preample since not all remotes transmit it.
+  // But we'll ignore this preamble since not all remotes transmit it.
   // All remotes start the command with an AGC of HIGH between 4800-5500 us
   // *********************************************************************
   
