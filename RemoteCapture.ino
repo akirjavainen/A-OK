@@ -100,9 +100,11 @@ void loop()
       if (DEBUG) Serial.println("1");
       
     } else { // Unrecognized bit (could be the next command's starting AGC), finish
-      if (DEBUG) Serial.println("INVALID BIT");
-      //Serial.print("INVALID BIT: ");
-      //Serial.println(t);
+      if (DEBUG) {
+        Serial.print("INVALID BIT");
+        Serial.println(t);
+      }
+
       i = 0;
       break;
     }
