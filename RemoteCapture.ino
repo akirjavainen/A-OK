@@ -126,7 +126,7 @@ void loop()
     }
     
   } else {
-    if (command != last_command) { // Only print unique commands to serial for easier readability
+    if (command != last_command) { // Only print unique commands to serial for better readability
       last_command = command;
       Serial.print("Successful capture, command is: ");
       Serial.println(command);
