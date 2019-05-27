@@ -218,6 +218,7 @@ void doAOKTribitSend(int *command_array) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitHigh(int delay_microseconds) {
   digitalWrite(TRANSMIT_PIN, HIGH);
+  //PORTB = PORTB D13high; // If you wish to use faster PORTB calls instead
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -225,6 +226,7 @@ void transmitHigh(int delay_microseconds) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitLow(int delay_microseconds) {
   digitalWrite(TRANSMIT_PIN, LOW);
+  //PORTB = PORTB D13low; // If you wish to use faster PORTB calls instead
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
