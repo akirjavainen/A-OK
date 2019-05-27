@@ -1,28 +1,30 @@
 /*
 ******************************************************************************************************************************************************************
 *
-* A-OK AC114-01B remote control (RF 433.92MHz) for window shades and projector screens
+* A-OK AC114-01B remote control (RF 433.92MHz) for roller shades and motorized projector screens
 * Control code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 * 
 * https://www.a-okmotors.com/en/
 * 
-* This is an incomplete implementation of the A-OK protocol. I only have one remote control.
+* This is an incomplete, but working implementation of the A-OK protocol.
 * 
 * 
 * HOW TO USE
 * 
-* Capture your remote controls with RemoteCapture.ino and copy paste the 65 bit
-* commands to A-OK.ino for sendAOKCommand(). More info about this
-* provided in RemoteCapture.ino.
+* Capture your remote controls with RemoteCapture.ino and copy paste the 65 bit commands to A-OK.ino
+* for sendAOKCommand(). More info about this provided in RemoteCapture.ino.
 * 
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
 * 
-* 1. Set the shade into pairing mode by holding down its PROGRAM button until it enters programming mode.
-* 2. Send the pairing command, eg. "sendAOKCommand(AOK_PROGRAM_EXAMPLE);".
-* 3. Now you can control the shade, eg. sendAOKCommand(AOK_DOWN_EXAMPLE); (or AOK_UP_EXAMPLE, AOK_STOP_EXAMPLE etc.).
+* 1. Set the motor or receiver into pairing mode with its PROGRAM button.
+* 2. Check the instructions on whether you need to send the pairing command
+* ("sendAOKCommand(AOK_PROGRAM_EXAMPLE);") or UP command ("sendAOKCommand(AOK_UP_EXAMPLE);").
+* Typically you need to transmit within 10 seconds.
+* 3. Now you can control the motor, e.g. "sendAOKCommand(AOK_DOWN_EXAMPLE);" (or AOK_UP_EXAMPLE, AOK_STOP_EXAMPLE etc.).
 * 
-* Setting limits is quicker with the remotes, although you can use your Arduino for that as well.
+* Setting limits for roller shade motors is quicker with the remotes, although you can use your Arduino
+* for that as well.
 *
 *
 * PROTOCOL DESCRIPTION
@@ -37,10 +39,10 @@
 * Tri-state bits are used.
 * 
 * AGC:
-* Some remotes start the first command with 8 times: HIGH of approx. 340 us + LOW of approx. 520 us
+* Some remotes start the first command with a preamble of 8 times: HIGH of approx. 340 us + LOW of approx. 520 us
 * But most remotes do not transmit that preamble.
 * Every remote starts the command with an AGC HIGH of approx. 5200 us.
-* Then go low for approx. 530 us and start the commands bits.
+* Then go LOW for approx. 530 us and start the commands bits.
 * 
 * COMMAND BITS:
 * 49 bits for a unique remote ID
@@ -60,15 +62,15 @@
 * (sample count / 44100 = microseconds).
 * 
 * Pulse length:
-* SHORT (LOW): approx. 7 samples = 159 us
-* MEDIUM (HIGH-HIGH): approx. 18 samples = 408 us
-* LONG (HIGH-HIGH-HIGH): approx. 32 samples = 726 us
+* SHORT = 272 us (12 samples)
+* LONG = 567 us (25 samples, approx. 2 * SHORT)
 *
 * Data bits:
-* Data 0 = MEDIUM LOW - MEDIUM HIGH - SHORT LOW (wire 00110)
-* Data 1 = LONG HIGH - SHORT LOW (wire 1110)
+* Data 0 = short HIGH, long LOW (wire 100)
+* Data 1 = long HIGH, short LOW (wire 110)
 * 
-* End with LOW radio silence of (minimum) 11 samples = 249 us
+* This code transmits a radio silence of 5034 us (222 samples) after each command, although not all AC114-01B
+* remotes do.
 *
 ******************************************************************************************************************************************************************
 */
@@ -117,17 +119,23 @@ void setup() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void loop() {
 
-  // Pair a shade (first set the shade to pairing mode by holding
-  // down its setting key), then send the pairing command:
-  //sendAOKCommand(AOK_PROGRAM_EXAMPLE);
+  // Pair a motor/receiver (first set the receiver to pairing mode by holding down
+  // its PROGRAM button), then send the PROGRAM or UP command (check the instructions
+  // of your device on which one is required for pairing):
+  
+  //sendAOKCommand(AOK_PROGRAM_EXAMPLE); // AM25-1.2/30-MEL-P motor requires this for pairing
+  //sendAOKCommand(AOK_UP_EXAMPLE); // AC202-02 receiver requires this for pairing
+  
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
   // ---
 
   // Send the command:
-  sendAOKCommand(AOK_UP_EXAMPLE);
-  delay(5000);
-  sendAOKCommand(AOK_STOP_EXAMPLE);
-  delay(5000);
+  //sendAOKCommand(AOK_DOWN_EXAMPLE);
+  //sendAOKCommand(AOK_AFTER_UP_DOWN_EXAMPLE); // This doesn't seem to be required at all, so you can most likely skip it
+  //delay(3000);
+  //sendAOKCommand(AOK_UP_EXAMPLE);
+  //sendAOKCommand(AOK_AFTER_UP_DOWN_EXAMPLE); // This doesn't seem to be required at all, so you can most likely skip it
+  //delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
