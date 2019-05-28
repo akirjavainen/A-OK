@@ -1,5 +1,5 @@
 # A-OK AC114-01B remote control (RF 433.92MHz) for roller shades and motorized projector screens
-A-OK protocol implementation for Arduino. Tested with AM25-1.2/30-MEL-P motors and AC202-02 RF receivers.
+A-OK protocol implementation for Arduino and Raspberry Pi. Tested with AM25-1.2/30-MEL-P motors and AC202-02 RF receivers.
 
 https://www.a-okmotors.com/en/
 
