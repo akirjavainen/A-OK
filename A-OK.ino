@@ -50,7 +50,7 @@
 * 5 bits are unknown (maybe some kind of checksum?)
 * 4 bits at the end are always 0111, except for the AFTER UP/DOWN commands 1001
 * 
-* = a total of 65 command bits
+* = 65 bits in total
 * 
 * RADIO SILENCE:
 * Some remotes instantly repeat the commands, some transmit a radio silence of approx. 5030 us at the end
@@ -74,6 +74,26 @@
 *
 ******************************************************************************************************************************************************************
 */
+
+
+
+// --- GIT: Delete from here ---
+// Remote 1:
+#define AOK_DOWN_1                    "10100011010111111100011111111001000000010000000001000011011000111"
+#define AOK_UP_1                      "10100011010111111100011111111001000000010000000000001011001010111"
+#define AOK_AFTER_UP_DOWN_1           "10100011010111111100011111111001000000010000000000100100010001001"
+#define AOK_STOP_1                    "10100011010111111100011111111001000000010000000000100011010000111"
+#define AOK_PROGRAM_1                 "10100011010111111100011111111001000000010000000001010011011100111"
+
+// Remote 2:
+#define AOK_DOWN_2                    "10100011010111111110011000110010000000010000000001000011101110111"
+#define AOK_UP_2                      "10100011010111111110011000110010000000010000000000001011100000111"
+#define AOK_AFTER_UP_DOWN_2           "10100011010111111110011000110010000000010000000000100100100111001"
+#define AOK_STOP_2                    "10100011010111111110011000110010000000010000000000100011100110111"
+#define AOK_PROGRAM_2                 "10100011010111111110011000110010000000010000000001010011110010111"
+
+// Example commands = Valkokangas remote
+// --- GIT: Delete to here ---
 
 
 
@@ -140,30 +160,28 @@ void loop() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void sendAOKCommand(String command) {
+void sendAOKCommand(char* command) {
   
+  if (command == NULL) {
+    errorLog("sendAOKCommand(): Command array pointer was NULL, cannot continue.");
+    return;
+  }
+
   // Prepare for transmitting and check for validity
   pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   
-  if (command.length() < AOK_COMMAND_BIT_ARRAY_SIZE) {
+  if (strlen(command) < AOK_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendAOKCommand(): Invalid command (too short), cannot continue.");
     return;
   }
-  if (command.length() > AOK_COMMAND_BIT_ARRAY_SIZE) {
+  if (strlen(command) > AOK_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendAOKCommand(): Invalid command (too long), cannot continue.");
     return;
   }
-
-  // Declare the array (int) of command bits
-  int command_array[AOK_COMMAND_BIT_ARRAY_SIZE];
-
-  // Processing a string during transmit is just too slow,
-  // let's convert it to an array of int first:
-  convertStringToArrayOfInt(command, command_array, AOK_COMMAND_BIT_ARRAY_SIZE);
   
   // Repeat the command:
   for (int i = 0; i < REPEAT_COMMAND; i++) {
-    doAOKTribitSend(command_array);
+    doAOKTribitSend(command);
   }
 
   // Disable output to transmitter to prevent interference with
@@ -174,12 +192,7 @@ void sendAOKCommand(String command) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void doAOKTribitSend(int *command_array) {
-
-  if (command_array == NULL) {
-    errorLog("doAOKTribitSend(): Array pointer was NULL, cannot continue.");
-    return;
-  }
+void doAOKTribitSend(char* command) {
 
   // Starting (AGC) bits:
   transmitHigh(AOK_AGC1_PULSE);
@@ -189,13 +202,13 @@ void doAOKTribitSend(int *command_array) {
   for (int i = 0; i < AOK_COMMAND_BIT_ARRAY_SIZE; i++) {
 
       // If current bit is 0, transmit HIGH-LOW-LOW (100):
-      if (command_array[i] == 0) {
+      if (command[i] == '0') {
         transmitHigh(AOK_PULSE_SHORT);
         transmitLow(AOK_PULSE_LONG);
       }
 
-      // If current bit is 1, transmit HIGH-HIGH-LOW (110);
-      if (command_array[i] == 1) {
+      // If current bit is 1, transmit HIGH-HIGH-LOW (110):
+      if (command[i] == '1') {
         transmitHigh(AOK_PULSE_LONG);
         transmitLow(AOK_PULSE_SHORT);
       }   
@@ -228,40 +241,6 @@ void transmitLow(int delay_microseconds) {
   digitalWrite(TRANSMIT_PIN, LOW);
   //PORTB = PORTB D13low; // If you wish to use faster PORTB calls instead
   delayMicroseconds(delay_microseconds);
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-int convertStringToInt(String s) {
-  char carray[2];
-  int i = 0;
-  
-  s.toCharArray(carray, sizeof(carray));
-  i = atoi(carray);
-
-  return i;
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void convertStringToArrayOfInt(String command, int *int_array, int command_array_size) {
-  String c = "";
-
-  if (int_array == NULL) {
-    errorLog("convertStringToArrayOfInt(): Array pointer was NULL, cannot continue.");
-    return;
-  }
- 
-  for (int i = 0; i < command_array_size; i++) {
-      c = command.substring(i, i + 1);
-
-      if (c == "0" || c == "1") {
-        int_array[i] = convertStringToInt(c);
-      } else {
-        errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command.");
-        return;
-      }
-  }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
