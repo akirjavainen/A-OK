@@ -42,8 +42,8 @@ AOK_COMMAND_BIT_ARRAY_SIZE = 65
 def sendAOKCommand(command):
 
     if len(str(command)) is not AOK_COMMAND_BIT_ARRAY_SIZE:
-        print "Your (invalid) command was", len(str(command)), "bits long."
-        print ""
+        print("Your (invalid) command was", len(str(command)), "bits long.")
+        print
         printUsage()
 
     # Prepare:
@@ -77,7 +77,7 @@ def doAOKTribitSend(command):
             transmitLow(AOK_PULSE_SHORT)
 
         else:
-            print "Invalid character", i, "in command! Exiting..."
+            print("Invalid character", i, "in command! Exiting...")
             exitProgram()
 
     # Radio silence:
@@ -101,10 +101,10 @@ def transmitLow(delay):
 
 # ------------------------------------------------------------------
 def printUsage():
-    print "Usage:"
-    print os.path.basename(sys.argv[0]), "[command_string]"
+    print("Usage:")
+    print(os.path.basename(sys.argv[0]), "[command_string]")
     print
-    print "Correct command length is", AOK_COMMAND_BIT_ARRAY_SIZE, "bits."
+    print("Correct command length is", AOK_COMMAND_BIT_ARRAY_SIZE, "bits.")
     print
     exit()
 # ------------------------------------------------------------------
@@ -126,4 +126,3 @@ if len(sys.argv) < 2:
     printUsage()
 
 sendAOKCommand(sys.argv[1])
-
