@@ -3,6 +3,8 @@ A-OK protocol implementation for Arduino and Raspberry Pi. Tested with AM25-1.2/
 
 https://www.a-okmotors.com/en/
 
+Special thanks to Jason von Nieda for his contribution on reverse engineering the protocol and checksum.
+
 
 # How to use
 Capture your remote controls with RemoteCapture.ino and copy paste the 65 bit commands to A-OK.ino for sendAOKCommand(). More info about this provided in RemoteCapture.ino.

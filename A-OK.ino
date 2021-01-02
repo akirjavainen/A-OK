@@ -51,7 +51,7 @@
 * 64 bits of data, with a trailing 1 making it 65 bits transmitted. The packet format is:
 * 
 * [Start][ID][Address][Command][Checksum][1]
-
+*
 * Start: 8 bits unsigned, always 0xa3, hardcoded.
 * ID: 24 bits unsigned, unique per remote.
 * Address: 16 bits unsigned. This is a bit field so a remote can have up to 16 channels, 
