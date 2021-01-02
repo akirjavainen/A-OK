@@ -6,7 +6,7 @@
 * 
 * https://www.a-okmotors.com/en/
 * 
-* This is an incomplete, but working implementation of the A-OK protocol.
+* This is an implementation of the A-OK protocol. Special thanks to Jason von Nieda for his contribution.
 * 
 * 
 * HOW TO USE
@@ -44,14 +44,24 @@
 * Every remote starts the command with an AGC HIGH of approx. 5200 us.
 * Then go LOW for approx. 530 us and start the commands bits.
 * 
-* COMMAND BITS:
-* 49 bits for a unique remote ID
-* 7 bits for command (UP = 0001011, DOWN = 1000011, STOP = 0100011, PROGRAM = 1010011, AFTER UP/DOWN = 0100100)
-* 5 bits are unknown (maybe some kind of checksum?)
-* 4 bits at the end are always 0111, except for the AFTER UP/DOWN commands 1001
+*
+*
+* Jason von Nieda reverse engineered the protocol, including the checksum. This is from his post from Github:
 * 
-* = 65 bits in total
+* 64 bits of data, with a trailing 1 making it 65 bits transmitted. The packet format is:
 * 
+* [Start][ID][Address][Command][Checksum][1]
+
+* Start: 8 bits unsigned, always 0xa3, hardcoded.
+* ID: 24 bits unsigned, unique per remote.
+* Address: 16 bits unsigned. This is a bit field so a remote can have up to 16 channels, 
+*   or you can send multiple bits as 1 to trigger multiple channels at once.
+* Command: 8 bits unsigned (UP = 11, DOWN = 67, STOP = 35, PROGRAM = 83, AFTER UP/DOWN = 36).
+* Checksum: 8 bits unsigned, 8 bit sum of ID, Address, and Command.
+* 
+* Big thanks to Jason for his work, which allows us to generate our own "virtual" remotes!
+*
+*
 * RADIO SILENCE:
 * Some remotes instantly repeat the commands, some transmit a radio silence of approx. 5030 us at the end
 * of each command.
