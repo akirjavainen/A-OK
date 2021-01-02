@@ -3,7 +3,7 @@ A-OK protocol implementation for Arduino and Raspberry Pi. Tested with AM25-1.2/
 
 https://www.a-okmotors.com/en/
 
-Special thanks to Jason von Nieda for his contribution on reverse engineering the protocol and checksum.
+Special thanks to Jason von Nieda for his contribution on reverse engineering the protocol and checksum (https://github.com/akirjavainen/A-OK/issues/1).
 
 
 # How to use
