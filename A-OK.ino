@@ -61,6 +61,17 @@
 * 
 * Big thanks to Jason for his work, which allows us to generate our own "virtual" remotes!
 *
+* 
+* Here's the checksum calculation, provided by Privet-zdarova:
+* Checksum: 8 bits unsigned, 8 bit sum of ID, Address, and Command.
+*
+* Example:
+* 10100011 01000110 01010000 00010110 00000001 00000000 00100011 11010000 1
+* Checksum = 01000110+01010000+00010110 + 00000001+00000000 + 00100011 + 11010000
+*
+* If the final number turned out to be more than 8 bits, then only 8 least significant bits are used.
+* Thank you, Privet-zdarova (also for the "change direction" command)!
+*
 *
 * RADIO SILENCE:
 * Some remotes instantly repeat the commands, some transmit a radio silence of approx. 5030 us at the end
@@ -93,7 +104,7 @@
 #define AOK_AFTER_UP_DOWN_EXAMPLE     "10100011010001100101000000010110000000010000000000100100110100011"
 #define AOK_STOP_EXAMPLE              "10100011010001100101000000010110000000010000000000100011110100001"
 #define AOK_PROGRAM_EXAMPLE           "10100011010001100101000000010110000000010000000001010011000000001"
-
+#define AOK_CHANGE_DIRECTION_EXAMPLE  "10100011010001100101000000010110000000010000000001010000111111011" // Pressing STOP button for 5 seconds
 
 #define TRANSMIT_PIN             13      // We'll use digital 13 for transmitting
 #define REPEAT_COMMAND           8       // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
